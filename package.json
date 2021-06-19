@@ -19,6 +19,6 @@
   "homepage": "https://github.com/holms-lm/form-dispatcher#readme",
   "dependencies": {
     "jquery": "^3.2.1",
-    "jquery-validation": "^1.19.2",
+    "jquery-validation": "^1.19.2"
   },
 }
