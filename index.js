@@ -7,14 +7,16 @@ class FormDispatcher {
     this.$form = $form;
     this.formSelector = parameters.formSelector;
     this.formSelectorDefault = '.js--validate';
+    this.hideFormOnsuccess = parameters.hideFormOnsuccess;
+    this.unlockSubmit = parameters.unlockSubmit;
   }
 
   init() {
-    this.validate = new Validate(this.$form, this.notify.bind(this));
+    this.validate = new Validate(this.$form, this.notify.bind(this), null, null, this.unlockSubmit);
     this.validate.init();
     this.sendForm = new SendForm(this.$form, this.notify.bind(this));
     this.handlerAnswer = new HandlerAnswer(
-      this.$form, this.notify.bind(this), this.validate.classElements,
+      this.$form, this.notify.bind(this), this.validate.classElements, this.hideFormOnsuccess,
     );
   }
 
@@ -24,6 +26,9 @@ class FormDispatcher {
         switch (event) {
           case 'send':
             this.sendForm.send(parameters);
+            break;
+          case 'clearMessages':
+            this.handlerAnswer.clearMessages();
             break;
           default:
             break;

@@ -2,23 +2,29 @@ import 'jquery-validation/dist/jquery.validate';
 
 class Validate {
   constructor($form, dispatcher, sender,
-    unlockFieldset = false) {
+    unlockFieldset = false, unlockSubmit = false) {
     this.$form = $form;
     this.dispatcher = dispatcher;
     this.sender = sender;
     this.typesRules = [];
-    this.wrapperElement = 'forms_element';
-    this.messageElement = 'forms_element__message';
+    this.wrapperElement = 'form_element';
+    this.validateElement = '.js--form_element';
+    this.$validateElement = $(this.validateElement);
+    this.messageElement = 'form_element__message';
     this.classElements = {
       wrapperElement: this.wrapperElement, messageElement: this.messageElement,
     };
     this.unlockFieldset = !unlockFieldset ? this.$form.data('lockClass') : unlockFieldset;
+    this.unlockSubmit = unlockSubmit;
+    this.unlockSubmitClass = this.$form.data('submitClass');
   }
 
   init() {
     const validateOptions = Object.assign(this.getMainOptions(), this.getFormRulesObject());
     this.validator = this.$form.validate(validateOptions);
+    console.log(this.validator);
     this.enableFieldset();
+    if (this.unlockSubmit) this.unlockSubmitOnValid();
   }
 
   sendForm(token = false) {
@@ -36,7 +42,12 @@ class Validate {
     const options = {
       errorElement: 'span',
       errorPlacement(error, element) {
-        error.appendTo(element.closest(`.${cThis.wrapperElement}`).find(`.${cThis.messageElement}`));
+        const $message = element.closest(`.${cThis.wrapperElement}`).find(`.${cThis.messageElement}`);
+        $message.empty();
+        if (cThis.dispatcher) {
+          cThis.dispatcher('validate', 'clearMessages');
+        }
+        error.appendTo($message);
       },
       highlight(element) {
         const $wrapperElement = $(element.closest(`.${cThis.wrapperElement}`));
@@ -150,6 +161,28 @@ class Validate {
     if (this.unlockFieldset) {
       const $fieldset = this.$form.find(`.${this.unlockFieldset}`);
       if ($fieldset.length) $fieldset.prop('disabled', false);
+    }
+  }
+
+  unlockSubmitOnValid() {
+    const cThis = this;
+    let $button;
+    if (this.unlockSubmit) {
+      $button = $(this.unlockSubmitClass);
+    } else {
+      $button = this.$form.find('*:submit');
+    }
+    function isFormValid() {
+      const allValidateElements = cThis.$validateElement.length;
+      const validElements = cThis.$form.find(`.${cThis.wrapperElement}--ok`).length;
+      console.log('isFormValid', allValidateElements, validElements);
+      return allValidateElements === validElements;
+    }
+    if ($button && $button.length) {
+      $button.prop('disabled', true);
+      this.$form.find('input, textarea').blur(() => {
+        if (isFormValid()) $button.prop('disabled', false);
+      });
     }
   }
 }

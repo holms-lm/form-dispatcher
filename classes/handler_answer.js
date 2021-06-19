@@ -1,14 +1,21 @@
 class HandlerAnswer {
-  constructor($form, dispatcher, classElements) {
+  constructor($form, dispatcher, classElements, hideFormOnsuccess) {
     this.$form = $form;
     this.dispatcher = dispatcher;
     this.directive = {};
     this.formParameters = {};
     this.classElements = classElements;
+    this.hideFormOnsuccess = hideFormOnsuccess;
     this.typeMessage = {
       error: 'alert-danger',
       ok: 'alert-success',
     };
+  }
+
+  clearMessages() {
+    this.parsFormParameters();
+    this.showServerMessage(false); // очистка
+    $(`#${this.formParameters.messageSuccess}`).addClass('d-none');
   }
 
   success(parameters) {
@@ -46,6 +53,7 @@ class HandlerAnswer {
       }
     }
     if (this.directive.status === 'ok' && this.formParameters.messageSuccess) {
+      if (this.hideFormOnsuccess) this.$form.hide();
       $(`#${this.formParameters.messageSuccess}`).removeClass('d-none');
     }
     if (this.directive.status === 'error') {
@@ -74,7 +82,7 @@ class HandlerAnswer {
 
   showServerMessage(message, type = 'alert-success') {
     const $wrapper = $(this.formParameters.serverMessage);
-    if (this.classElements) $(`.${this.classElements.messageElement}`).empty();
+    // if (this.classElements) $(`.${this.classElements.messageElement}`).empty();
     $wrapper.empty();
     if (message) {
       $wrapper.append(message);

@@ -5,7 +5,7 @@ class SendForm {
   constructor($form, dispatcher) {
     this.$form = $form;
     this.dispatcher = dispatcher;
-    this.disabledElements = $form.find(':input:disabled').removeAttr('disabled');
+    this.disabledElements = $form.find(':input:disabled');
     this.$button = this.$form.find('button[type="submit"]');
     if (this.$button.length === 0 && this.$form.data('buttonId')) {
       this.$button = $(`#${this.$form.data('buttonId')}`);
@@ -16,13 +16,13 @@ class SendForm {
   send(parameters = {}) {
     const gRecaptchaResponse = parameters.token;
     const cThis = this;
+    this.disabledElements.removeAttr('disabled');
     let dataForm = this.$form.serializeArray();
     dataForm = SendForm.replacePhone(dataForm, '+38'); // TODO Вынести в параметры
     if (this.$form.attr('action') === '') {
       console.log('Send form to empty url:', this.$form.attr('action'));
     } else if (this.$form.data('sendType') === 'ajax') {
-      // TODO не забыть поменять на ajax
-      ajaxTest({
+      $.ajax({
         url: this.$form.attr('action'),
         type: this.$form.attr('method'),
         data: gRecaptchaResponse
